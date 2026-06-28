@@ -3,72 +3,299 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Send a Note</title>
+  <title>Guru Dad</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: -apple-system, sans-serif;
-      max-width: 480px;
-      margin: 60px auto;
-      text-align: center;
-      padding: 0 20px;
-      background: #fafafa;
+    :root {
+      --cream: #FFF8ED;
+      --maroon: #7A2E2E;
+      --saffron: #E8902C;
+      --gold: #C9962C;
+      --ink: #2A1B12;
     }
-    h1 { font-size: 1.6em; color: #222; }
-    p { color: #666; }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Inter', -apple-system, sans-serif;
+      color: var(--cream);
+      position: relative;
+
+      background:
+        radial-gradient(circle at 50% 0%, #9c4438 0%, var(--maroon) 45%, #4a1818 100%);
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 24px 40px;
+      overflow-x: hidden;
+    }
+
+    /*
+      The success photo layer. Hidden until a note is sent.
+      Swap in the real photo by replacing the URL below, e.g.:
+      background-image: url('family-photo.jpg');
+    */
+    .success-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      pointer-events: none;
+
+      background-image:
+        linear-gradient(180deg, rgba(20,10,5,0.55) 0%, rgba(20,10,5,0.35) 45%, rgba(20,10,5,0.75) 100%),
+        radial-gradient(circle at 50% 15%, rgba(232,144,44,0.25), transparent 60%),
+        linear-gradient(160deg, #3a1f12 0%, #1f120c 100%);
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+
+    body.sent .success-bg {
+      opacity: 1;
+    }
+
+    .quote {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 500;
+      font-size: 1.45em;
+      line-height: 1.4;
+      max-width: 420px;
+      text-align: center;
+      color: var(--cream);
+      text-shadow: 0 2px 14px rgba(0,0,0,0.5);
+      margin: 0 0 8px;
+    }
+
+    .quote-rule {
+      width: 64px;
+      height: 2px;
+      background: var(--saffron);
+      margin: 18px 0 36px;
+      border-radius: 2px;
+      box-shadow: 0 0 8px rgba(232,144,44,0.6);
+    }
+
+    .card {
+      width: 100%;
+      max-width: 380px;
+      background: rgba(255, 248, 237, 0.96);
+      border-radius: 18px;
+      padding: 32px 28px 36px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+      margin-top: auto;
+    }
+
+    .card h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: 1.3em;
+      color: var(--maroon);
+      margin: 0 0 4px;
+    }
+
+    .card p {
+      color: #6b5a4a;
+      font-size: 0.92em;
+      margin: 0 0 22px;
+    }
+
     #preview {
       max-width: 100%;
-      margin-top: 20px;
-      border-radius: 8px;
+      border-radius: 12px;
       display: none;
+      margin-bottom: 18px;
+      border: 1px solid rgba(0,0,0,0.08);
     }
+
     input[type="file"] {
       display: none;
     }
+
     .pick-btn {
       display: inline-block;
-      background: #2d6cdf;
-      color: white;
-      padding: 16px 28px;
-      border-radius: 10px;
-      font-size: 1.1em;
-      margin-top: 20px;
+      background: var(--cream);
+      color: var(--maroon);
+      border: 1.5px solid var(--gold);
+      padding: 13px 26px;
+      border-radius: 30px;
+      font-size: 0.95em;
+      font-weight: 600;
       cursor: pointer;
+      transition: background 0.15s ease;
     }
+
+    .pick-btn:hover { background: #fcf0d8; }
+
+    /* The Om send button — the signature element */
     .send-btn {
       display: none;
-      width: 100%;
-      background: #2eb872;
-      color: white;
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      margin: 22px auto 6px;
       border: none;
-      padding: 16px;
-      border-radius: 10px;
-      font-size: 1.1em;
-      margin-top: 16px;
       cursor: pointer;
+      position: relative;
+
+      background: radial-gradient(circle at 35% 30%, #f3b65c, var(--saffron) 55%, var(--maroon) 100%);
+      box-shadow:
+        0 8px 24px rgba(122,46,46,0.45),
+        inset 0 2px 4px rgba(255,255,255,0.35),
+        inset 0 -3px 6px rgba(0,0,0,0.25);
+
+      font-size: 2.4em;
+      line-height: 92px;
+      color: var(--cream);
+      text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
+
+    .send-btn:hover {
+      transform: scale(1.05);
+      box-shadow:
+        0 10px 28px rgba(122,46,46,0.55),
+        inset 0 2px 4px rgba(255,255,255,0.4),
+        inset 0 -3px 6px rgba(0,0,0,0.25);
+    }
+
+    .greeting {
+      display: none;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 1.05em;
+      color: var(--maroon);
+      margin: 4px 0 8px;
+    }
+
+    .send-btn:active { transform: scale(0.97); }
+
+    .send-label {
+      display: none;
+      font-size: 0.8em;
+      color: #9c8978;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
     #status {
-      margin-top: 16px;
-      font-weight: bold;
+      margin-top: 14px;
+      font-weight: 600;
+      font-size: 0.92em;
+      min-height: 1.2em;
+    }
+
+    /* Success screen — lets the background breathe more than the form card does */
+    .success-card {
+      display: none;
+      background: rgba(42, 27, 18, 0.55);
+      border: 1px solid rgba(255, 248, 237, 0.25);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+      animation: success-rise 0.5s ease;
+    }
+
+    .success-card h2 {
+      color: var(--cream);
+    }
+
+    .success-sub {
+      color: rgba(255, 248, 237, 0.75) !important;
+    }
+
+    .success-om {
+      font-size: 3.2em;
+      line-height: 1;
+      margin-bottom: 6px;
+      color: var(--saffron);
+      text-shadow:
+        0 0 18px rgba(232,144,44,0.65),
+        0 2px 6px rgba(0,0,0,0.4);
+      animation: om-glow 2.4s ease-in-out infinite;
+    }
+
+    .again-btn {
+      margin-top: 18px;
+      background: transparent;
+      border: 1.5px solid rgba(255, 248, 237, 0.55);
+      color: var(--cream);
+      padding: 11px 24px;
+      border-radius: 30px;
+      font-size: 0.88em;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .again-btn:hover {
+      background: rgba(255, 248, 237, 0.12);
+      border-color: var(--saffron);
+    }
+
+    @keyframes success-rise {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes om-glow {
+      0%, 100% { text-shadow: 0 0 18px rgba(232,144,44,0.65), 0 2px 6px rgba(0,0,0,0.4); }
+      50% { text-shadow: 0 0 30px rgba(232,144,44,0.9), 0 2px 6px rgba(0,0,0,0.4); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .success-card { animation: none; }
+      .success-om { animation: none; }
     }
   </style>
 </head>
 <body>
-  <h1>📝 Send a Note</h1>
-  <p>Take a photo of your note and it'll print out on the other end.</p>
 
-  <label class="pick-btn" for="photoInput">Take / Choose Photo</label>
-  <input type="file" id="photoInput" accept="image/*" capture="environment">
+  <div class="success-bg"></div>
 
-  <img id="preview">
-  <button class="send-btn" id="sendBtn">Send It</button>
+  <p class="quote">"Guru Dath may be our priest,<br>but when life takes a turn,<br>we need Guru Dad."</p>
+  <div class="quote-rule"></div>
 
-  <div id="status"></div>
+  <div class="card" id="card">
+    <h2>Send your Notecard</h2>
+    <p> it will promptly be printed in my room, wherever you are, and wherever I am.</p>
+
+    <label class="pick-btn" for="photoInput"> Upload Wisdom Here </label>
+    <input type="file" id="photoInput" accept="image/*" capture="environment">
+
+    <img id="preview">
+    <div class="greeting" id="greeting">Hi Dad, excited for some wisdom!</div>
+    <button class="send-btn" id="sendBtn" aria-label="Send note">ॐ</button>
+    <div class="send-label" id="sendLabel">tap to send</div>
+
+    <div id="status"></div>
+  </div>
+
+  <div class="card success-card" id="successCard">
+    <div class="success-om">ॐ</div>
+    <h2>Sent</h2>
+    <p class="success-sub">It'll print in his room shortly.</p>
+    <button class="again-btn" id="againBtn">Send another</button>
+  </div>
 
   <script>
     const photoInput = document.getElementById('photoInput');
     const preview = document.getElementById('preview');
+    const greeting = document.getElementById('greeting');
     const sendBtn = document.getElementById('sendBtn');
+    const sendLabel = document.getElementById('sendLabel');
     const status = document.getElementById('status');
+    const card = document.getElementById('card');
+    const successCard = document.getElementById('successCard');
+    const againBtn = document.getElementById('againBtn');
     let selectedFile = null;
 
     photoInput.addEventListener('change', () => {
@@ -76,7 +303,9 @@
       selectedFile = photoInput.files[0];
       preview.src = URL.createObjectURL(selectedFile);
       preview.style.display = 'block';
-      sendBtn.style.display = 'block';
+      greeting.style.display = 'block';
+      sendBtn.style.display = 'inline-block';
+      sendLabel.style.display = 'block';
       status.textContent = '';
     });
 
@@ -84,7 +313,8 @@
       if (!selectedFile) return;
 
       sendBtn.disabled = true;
-      sendBtn.textContent = 'Sending...';
+      sendBtn.style.opacity = '0.6';
+      sendLabel.textContent = 'sending...';
 
       const formData = new FormData();
       formData.append('photo', selectedFile);
@@ -97,11 +327,11 @@
         const result = await response.json();
 
         if (result.success) {
-          status.textContent = '✅ Sent! It\'ll print soon.';
-          status.style.color = '#2eb872';
-          preview.style.display = 'none';
-          sendBtn.style.display = 'none';
+          document.body.classList.add('sent');
+          card.style.display = 'none';
+          successCard.style.display = 'block';
           photoInput.value = '';
+          selectedFile = null;
         } else {
           status.textContent = '❌ ' + (result.error || 'Something went wrong.');
           status.style.color = '#d9534f';
@@ -112,7 +342,19 @@
       }
 
       sendBtn.disabled = false;
-      sendBtn.textContent = 'Send It';
+      sendBtn.style.opacity = '1';
+      sendLabel.textContent = 'tap to send';
+    });
+
+    againBtn.addEventListener('click', () => {
+      document.body.classList.remove('sent');
+      successCard.style.display = 'none';
+      card.style.display = 'block';
+      preview.style.display = 'none';
+      greeting.style.display = 'none';
+      sendBtn.style.display = 'none';
+      sendLabel.style.display = 'none';
+      status.textContent = '';
     });
   </script>
 </body>
