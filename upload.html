@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Send a Note</title>
+  <style>
+    body {
+      font-family: -apple-system, sans-serif;
+      max-width: 480px;
+      margin: 60px auto;
+      text-align: center;
+      padding: 0 20px;
+      background: #fafafa;
+    }
+    h1 { font-size: 1.6em; color: #222; }
+    p { color: #666; }
+    #preview {
+      max-width: 100%;
+      margin-top: 20px;
+      border-radius: 8px;
+      display: none;
+    }
+    input[type="file"] {
+      display: none;
+    }
+    .pick-btn {
+      display: inline-block;
+      background: #2d6cdf;
+      color: white;
+      padding: 16px 28px;
+      border-radius: 10px;
+      font-size: 1.1em;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+    .send-btn {
+      display: none;
+      width: 100%;
+      background: #2eb872;
+      color: white;
+      border: none;
+      padding: 16px;
+      border-radius: 10px;
+      font-size: 1.1em;
+      margin-top: 16px;
+      cursor: pointer;
+    }
+    #status {
+      margin-top: 16px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>📝 Send a Note</h1>
+  <p>Take a photo of your note and it'll print out on the other end.</p>
+
+  <label class="pick-btn" for="photoInput">Take / Choose Photo</label>
+  <input type="file" id="photoInput" accept="image/*" capture="environment">
+
+  <img id="preview">
+  <button class="send-btn" id="sendBtn">Send It</button>
+
+  <div id="status"></div>
+
+  <script>
+    const photoInput = document.getElementById('photoInput');
+    const preview = document.getElementById('preview');
+    const sendBtn = document.getElementById('sendBtn');
+    const status = document.getElementById('status');
+    let selectedFile = null;
+
+    photoInput.addEventListener('change', () => {
+      if (photoInput.files.length === 0) return;
+      selectedFile = photoInput.files[0];
+      preview.src = URL.createObjectURL(selectedFile);
+      preview.style.display = 'block';
+      sendBtn.style.display = 'block';
+      status.textContent = '';
+    });
+
+    sendBtn.addEventListener('click', async () => {
+      if (!selectedFile) return;
+
+      sendBtn.disabled = true;
+      sendBtn.textContent = 'Sending...';
+
+      const formData = new FormData();
+      formData.append('photo', selectedFile);
+
+      try {
+        const response = await fetch('/upload', {
+          method: 'POST',
+          body: formData
+        });
+        const result = await response.json();
+
+        if (result.success) {
+          status.textContent = '✅ Sent! It\'ll print soon.';
+          status.style.color = '#2eb872';
+          preview.style.display = 'none';
+          sendBtn.style.display = 'none';
+          photoInput.value = '';
+        } else {
+          status.textContent = '❌ ' + (result.error || 'Something went wrong.');
+          status.style.color = '#d9534f';
+        }
+      } catch (err) {
+        status.textContent = '❌ Could not reach server.';
+        status.style.color = '#d9534f';
+      }
+
+      sendBtn.disabled = false;
+      sendBtn.textContent = 'Send It';
+    });
+  </script>
+</body>
+</html>
